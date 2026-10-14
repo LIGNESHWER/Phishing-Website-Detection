@@ -9,6 +9,7 @@ A machine learning project that detects phishing websites using a **Random Fores
 | `phishing_detection.ipynb` | Complete notebook: data loading, preprocessing, training, evaluation and prediction |
 | `data/dataset.csv` | Phishing websites dataset (11,055 rows, 30 website features + `Result` label) |
 | `requirements.txt` | Python libraries needed to run the notebook |
+| `models/phishing_random_forest_regressor.joblib` | Trained model (Random Forest + imputer + selected features) |
 
 ## Dataset
 
@@ -52,7 +53,18 @@ pip install -r requirements.txt
 ```
 
 Open `phishing_detection.ipynb` in Jupyter or VS Code and run all cells.
-Running the notebook creates `models/phishing_random_forest_regressor.joblib`.
+Running the notebook retrains the model and overwrites `models/phishing_random_forest_regressor.joblib`.
+
+### Using the saved model
+
+```python
+import joblib, pandas as pd
+art = joblib.load("models/phishing_random_forest_regressor.joblib")
+row = pd.read_csv("data/dataset.csv").drop(columns=["index", "Result"]).iloc[[0]]
+x = pd.DataFrame(art["imputer"].transform(row[art["all_features"]]), columns=art["all_features"])[art["features"]]
+score = art["model"].predict(x)[0]
+print("phishing" if score >= art["threshold"] else "legitimate", round(score, 4))
+```
 
 ### Google Colab
 
